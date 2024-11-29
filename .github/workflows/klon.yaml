@@ -1,0 +1,35 @@
+name: Website Downloader
+
+on:
+  workflow_dispatch: # Memungkinkan pemicu manual
+
+jobs:
+  download-website:
+    runs-on: ubuntu-latest
+
+    steps:
+    - name: Checkout Repository
+      uses: actions/checkout@v3
+
+    - name: Set up environment
+      run: |
+        sudo apt-get update
+        sudo apt-get install -y wget zip
+
+    - name: Download Website
+      env:
+        WEBSITE_URL: ${{ secrets.WEBSITE_URL }} # URL website disimpan di Secrets
+      run: |
+        mkdir -p website
+        wget --mirror --convert-links --adjust-extension --page-requisites --no-parent "$WEBSITE_URL" -P website
+
+    - name: Create ZIP Archive
+      run: |
+        cd website
+        zip -r ../website-offline.zip .
+
+    - name: Upload Artifact
+      uses: actions/upload-artifact@v3
+      with:
+        name: website-offline
+        path: website-offline.zip
