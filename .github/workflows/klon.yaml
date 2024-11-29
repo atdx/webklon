@@ -1,7 +1,12 @@
 name: Website Downloader
 
 on:
-  workflow_dispatch: # Memungkinkan pemicu manual
+  workflow_dispatch: # Memungkinkan input manual saat menjalankan workflow
+    inputs:
+      website_url:
+        description: "Enter the URL of the website to download"
+        required: true
+        default: "https://example.com"
 
 jobs:
   download-website:
@@ -11,17 +16,15 @@ jobs:
     - name: Checkout Repository
       uses: actions/checkout@v3
 
-    - name: Set up environment
+    - name: Set up Environment
       run: |
         sudo apt-get update
         sudo apt-get install -y wget zip
 
     - name: Download Website
-      env:
-        WEBSITE_URL: ${{ secrets.WEBSITE_URL }} # URL website disimpan di Secrets
       run: |
         mkdir -p website
-        wget --mirror --convert-links --adjust-extension --page-requisites --no-parent "$WEBSITE_URL" -P website
+        wget --mirror --convert-links --adjust-extension --page-requisites --no-parent "${{ github.event.inputs.website_url }}" -P website
 
     - name: Create ZIP Archive
       run: |
